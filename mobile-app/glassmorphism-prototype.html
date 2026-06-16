@@ -1,0 +1,2230 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Spaces@LBG — Glassmorphism Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #006a4e;
+    --brand-light: #2a9d75;
+    --glass-bg: rgba(255, 255, 255, 0.18);
+    --glass-bg-strong: rgba(255, 255, 255, 0.28);
+    --glass-border: rgba(255, 255, 255, 0.35);
+    --glass-shadow: 0 8px 32px rgba(8, 32, 24, 0.18);
+    --fg: #0f2a22;
+    --fg-muted: rgba(15, 42, 34, 0.65);
+    --fg-on-dark: #f4fbf8;
+
+    --page-bg-1: #e9fff5;
+    --page-bg-2: #d6f0ff;
+    --page-bg-3: #f5e6ff;
+    --orb-1: #2a9d75;
+    --orb-2: #ff9a8b;
+
+    --screen-bg-1: rgba(123, 232, 185, 0.6);
+    --screen-bg-2: rgba(251, 199, 132, 0.45);
+    --screen-bg-3: rgba(111, 199, 255, 0.5);
+    --screen-bg-4: #c6efe1;
+    --screen-bg-5: #e9d8ff;
+
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+  }
+
+  html[data-theme="dark"] {
+    --glass-bg: rgba(20, 30, 35, 0.45);
+    --glass-bg-strong: rgba(30, 50, 50, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --fg: #eaf4f0;
+    --fg-muted: rgba(234, 244, 240, 0.65);
+
+    --page-bg-1: #0a1620;
+    --page-bg-2: #1a1030;
+    --page-bg-3: #200a18;
+    --orb-1: #064a36;
+    --orb-2: #5a1f3c;
+
+    --screen-bg-1: rgba(20, 50, 80, 0.7);
+    --screen-bg-2: rgba(60, 30, 70, 0.5);
+    --screen-bg-3: rgba(20, 25, 50, 0.7);
+    --screen-bg-4: #0e1a26;
+    --screen-bg-5: #1a0e26;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: 'Inter Tight', system-ui, -apple-system, sans-serif;
+    color: var(--fg);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(circle at 15% 10%, var(--page-bg-1) 0%, transparent 35%),
+      radial-gradient(circle at 85% 20%, var(--page-bg-2) 0%, transparent 35%),
+      radial-gradient(circle at 80% 90%, var(--page-bg-3) 0%, transparent 40%),
+      linear-gradient(135deg, var(--page-bg-1) 0%, var(--page-bg-2) 50%, var(--page-bg-3) 100%);
+    background-attachment: fixed;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px 64px;
+    gap: 24px;
+  }
+
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(60px);
+    z-index: -1;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  body::before {
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, var(--orb-1), transparent 65%);
+    top: -80px; left: -120px;
+    animation: drift 18s ease-in-out infinite alternate;
+  }
+  body::after {
+    width: 460px; height: 460px;
+    background: radial-gradient(circle, var(--orb-2), transparent 65%);
+    bottom: -120px; right: -140px;
+    animation: drift 22s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes drift {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(40px, 30px) scale(1.08); }
+  }
+
+  .intro { width: 100%; max-width: 1200px; text-align: center; padding: 8px 16px 0; }
+  .intro h1 { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.01em; }
+  .intro p { color: var(--fg-muted); margin-top: 6px; font-size: 15px; }
+
+  /* === phone frame === */
+  .phone {
+    width: 390px;
+    max-width: 100%;
+    height: 840px;
+    border-radius: 48px;
+    padding: 12px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.45), rgba(255,255,255,0.12));
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow:
+      0 30px 80px rgba(8, 32, 24, 0.25),
+      0 8px 24px rgba(8, 32, 24, 0.12),
+      inset 0 1px 0 rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+  }
+  html[data-theme="dark"] .phone {
+    background: linear-gradient(160deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .phone__screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+    background:
+      radial-gradient(circle at 20% 0%, var(--screen-bg-1) 0%, transparent 45%),
+      radial-gradient(circle at 100% 30%, var(--screen-bg-2) 0%, transparent 45%),
+      radial-gradient(circle at 80% 100%, var(--screen-bg-3) 0%, transparent 50%),
+      linear-gradient(150deg, var(--screen-bg-4) 0%, var(--screen-bg-5) 100%);
+    transition: background 0.4s ease;
+  }
+
+  .status-bar {
+    height: 36px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 28px;
+    font-size: 13px; font-weight: 600;
+    color: var(--fg);
+    position: relative; z-index: 10;
+  }
+  .status-bar__right { display: flex; gap: 6px; align-items: center; }
+
+  .app-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 20px 16px;
+    position: relative; z-index: 10;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .logo-horse {
+    width: 46px; height: 38px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid rgba(255,255,255,0.7);
+    display: grid; place-items: center;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(8,32,24,0.12);
+    padding: 2px;
+  }
+  .logo-horse img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  html[data-theme="dark"] .logo-horse { background: #ffffff; }
+  .brand h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+  .brand .at { color: var(--brand-light); }
+
+  .avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2a9d75, #006a4e);
+    color: white;
+    display: grid; place-items: center;
+    font-weight: 600; font-size: 13px;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    box-shadow: 0 4px 10px rgba(0, 106, 78, 0.3);
+    cursor: pointer;
+    transition: transform 0.12s ease;
+  }
+  .avatar:active { transform: scale(0.94); }
+
+  /* === scroll views === */
+  .view {
+    height: calc(100% - 36px - 64px - 92px);
+    overflow-y: auto;
+    padding: 0 16px 24px;
+    scrollbar-width: none;
+    position: relative; z-index: 5;
+  }
+  .view::-webkit-scrollbar { display: none; }
+  .view[hidden] { display: none; }
+
+  /* === glass card === */
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.45);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+  }
+  html[data-theme="dark"] .glass {
+    box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .glass--soft { background: var(--glass-bg-strong); box-shadow: 0 4px 16px rgba(8,32,24,0.08), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .glass--brand {
+    background: linear-gradient(135deg, rgba(42,157,117,0.85), rgba(0,106,78,0.78));
+    border: 1px solid rgba(255,255,255,0.35);
+    color: var(--fg-on-dark);
+    box-shadow: 0 12px 30px rgba(0,106,78,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
+  }
+  .glass--amber {
+    background: linear-gradient(135deg, rgba(255,205,124,0.55), rgba(255,154,139,0.55));
+    border: 1px solid rgba(255,255,255,0.5);
+    color: var(--fg);
+  }
+  html[data-theme="dark"] .glass--amber { color: #1a0c00; }
+
+  /* === ANIMATED SKY === */
+  .sky-card {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 14px;
+    border-radius: var(--radius-lg);
+    padding: 0;
+    height: 200px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    background: linear-gradient(180deg, #87ceeb, #cfeeff);
+    transition: background 0.8s ease;
+  }
+  .sky-card.morning { background: linear-gradient(180deg, #f9c787 0%, #fdd9a3 35%, #d8eafb 100%); }
+  .sky-card.day     { background: linear-gradient(180deg, #5fb8ff 0%, #a8dcff 60%, #e7f6ff 100%); }
+  .sky-card.evening { background: linear-gradient(180deg, #ff7e6b 0%, #ff9e6d 40%, #ffd9a3 75%, #fde0c4 100%); }
+  .sky-card.night   { background: linear-gradient(180deg, #0a1736 0%, #1f1a5c 60%, #3b2566 100%); }
+
+  /* sun */
+  .sun, .moon {
+    position: absolute;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: top 1.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s ease;
+  }
+  .sun {
+    background: radial-gradient(circle at 35% 35%, #fff5c2, #ffd166 55%, #ffb347 100%);
+    box-shadow: 0 0 40px rgba(255, 220, 130, 0.85), 0 0 80px rgba(255, 180, 80, 0.5);
+  }
+  .moon {
+    background: radial-gradient(circle at 35% 35%, #ffffff, #e6e9f5 55%, #b4b9d0 100%);
+    box-shadow: 0 0 30px rgba(220, 230, 255, 0.6), 0 0 60px rgba(180, 200, 255, 0.3);
+  }
+  .moon::after {
+    content: '';
+    position: absolute;
+    top: 18%; left: 28%;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.08);
+  }
+  .moon::before {
+    content: '';
+    position: absolute;
+    top: 55%; left: 60%;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.06);
+  }
+
+  .sky-card.morning .sun  { top: 80px; }
+  .sky-card.day .sun      { top: 26px; }
+  .sky-card.evening .sun  { top: 105px; filter: hue-rotate(-10deg) saturate(1.2); }
+  .sky-card.night .sun    { opacity: 0; top: 220px; }
+
+  .sky-card.night .moon   { top: 30px; opacity: 1; }
+  .sky-card:not(.night) .moon { opacity: 0; top: 220px; }
+
+  /* clouds */
+  .cloud {
+    position: absolute;
+    background: rgba(255,255,255,0.85);
+    border-radius: 50%;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.06));
+    animation: cloudDrift 60s linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: rgba(255,255,255,0.85);
+    border-radius: 50%;
+  }
+  .cloud--1 {
+    width: 60px; height: 22px; top: 40px; left: -80px;
+    animation-duration: 70s;
+  }
+  .cloud--1::before { width: 28px; height: 28px; top: -14px; left: 10px; }
+  .cloud--1::after  { width: 22px; height: 22px; top: -8px; left: 32px; }
+  .cloud--2 {
+    width: 80px; height: 26px; top: 80px; left: -120px;
+    animation-duration: 95s; animation-delay: -30s;
+    opacity: 0.8;
+  }
+  .cloud--2::before { width: 36px; height: 36px; top: -18px; left: 12px; }
+  .cloud--2::after  { width: 26px; height: 26px; top: -10px; left: 40px; }
+  .cloud--3 {
+    width: 50px; height: 18px; top: 60px; left: -60px;
+    animation-duration: 80s; animation-delay: -55s;
+    opacity: 0.7;
+  }
+  .cloud--3::before { width: 24px; height: 24px; top: -12px; left: 8px; }
+  .cloud--3::after  { width: 18px; height: 18px; top: -6px; left: 26px; }
+
+  @keyframes cloudDrift {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(500px); }
+  }
+
+  .sky-card.night .cloud { opacity: 0.15; background: rgba(180,190,220,0.4); }
+  .sky-card.night .cloud::before, .sky-card.night .cloud::after { background: rgba(180,190,220,0.4); }
+
+  /* stars */
+  .star {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 1s ease;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  .sky-card.night .star { opacity: 1; }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50%      { opacity: 1; }
+  }
+
+  /* sky content overlay */
+  .sky-content {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 16px 20px;
+    color: var(--fg);
+    text-shadow: 0 1px 2px rgba(255,255,255,0.4);
+  }
+  .sky-card.night .sky-content { color: #f4fbf8; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+  .sky-content h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+  .sky-content p { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+  /* === today card === */
+  .today-card { display: flex; flex-direction: column; gap: 14px; margin-bottom: 14px; }
+  .today-card__row { display: flex; justify-content: space-between; align-items: center; }
+  .today-card__label { font-size: 11px; opacity: 0.85; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+  .today-card__desk { font-family: 'Fraunces', serif; font-size: 40px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .today-card__meta { display: flex; gap: 16px; font-size: 13px; opacity: 0.92; }
+  .today-card__meta strong { font-weight: 600; }
+  .badge-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 11px; border-radius: 999px;
+    background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.4);
+    font-size: 12px; font-weight: 500;
+  }
+  .badge-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: #7be8b9; box-shadow: 0 0 8px #7be8b9; }
+
+  .btn {
+    border: none; cursor: pointer;
+    font-family: inherit; font-weight: 600; font-size: 14px;
+    padding: 12px 18px; border-radius: 14px;
+    transition: transform 0.12s ease, background 0.16s ease;
+    color: var(--fg);
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn--glass {
+    background: rgba(255,255,255,0.28);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.45);
+    backdrop-filter: blur(8px);
+  }
+  .btn--solid { background: var(--brand); color: white; box-shadow: 0 6px 18px rgba(0,106,78,0.35); }
+  .btn--outline { background: var(--glass-bg-strong); color: var(--fg); border: 1px solid var(--glass-border); }
+  .btn--full { width: 100%; }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    margin: 18px 4px 10px;
+  }
+  .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .qa {
+    padding: 16px;
+    border-radius: var(--radius-md);
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 4px 14px rgba(8,32,24,0.1), inset 0 1px 0 rgba(255,255,255,0.5);
+    display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+    cursor: pointer; transition: transform 0.18s ease;
+    color: var(--fg);
+  }
+  .qa:hover { transform: translateY(-2px); }
+  .qa__icon {
+    width: 36px; height: 36px;
+    border-radius: 12px;
+    display: grid; place-items: center;
+    background: rgba(255,255,255,0.45);
+    color: var(--brand);
+  }
+  html[data-theme="dark"] .qa__icon { background: rgba(255,255,255,0.18); color: #7be8b9; }
+  .qa__label { font-weight: 600; font-size: 14px; }
+  .qa__sub { font-size: 12px; color: var(--fg-muted); }
+
+  /* === Book === */
+  .segmented {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 4px;
+    margin-bottom: 14px;
+    backdrop-filter: blur(12px);
+    position: relative;
+  }
+  .segmented__btn {
+    border: none; background: transparent;
+    padding: 10px 16px;
+    font-family: inherit; font-weight: 600; font-size: 13px;
+    color: var(--fg-muted);
+    cursor: pointer;
+    border-radius: 10px;
+    transition: color 0.18s ease;
+    position: relative; z-index: 2;
+  }
+  .segmented__btn--active { color: white; }
+  .segmented__indicator {
+    position: absolute;
+    top: 4px; bottom: 4px;
+    width: calc(50% - 4px);
+    background: var(--brand);
+    border-radius: 10px;
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 4px 12px rgba(0,106,78,0.3);
+    z-index: 1;
+  }
+  .segmented[data-active="room"] .segmented__indicator { transform: translateX(100%); }
+
+  /* === booking-for row === */
+  .booking-for {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    backdrop-filter: blur(12px);
+    cursor: pointer;
+    transition: transform 0.12s ease;
+  }
+  .booking-for:active { transform: scale(0.99); }
+  .booking-for__icon {
+    width: 36px; height: 36px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.45);
+    color: var(--brand);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  html[data-theme="dark"] .booking-for__icon { background: rgba(255,255,255,0.12); color: #7be8b9; }
+  .booking-for__text { flex: 1; min-width: 0; }
+  .booking-for__label { font-size: 11px; color: var(--fg-muted); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+  .booking-for__value { font-size: 14px; font-weight: 600; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .booking-for__chevron { color: var(--fg-muted); flex-shrink: 0; }
+
+  /* avatar stack */
+  .avatar-stack { display: inline-flex; align-items: center; margin-left: 6px; }
+  .avatar-stack__pill {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--glass-bg-strong);
+    margin-left: -8px;
+    display: grid; place-items: center;
+    color: white; font-weight: 600; font-size: 9px;
+  }
+  .avatar-stack__pill:first-child { margin-left: 0; }
+
+  /* colleague picker rows */
+  .colleague-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid var(--glass-border);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.14s ease;
+  }
+  html[data-theme="dark"] .colleague-row { background: rgba(255,255,255,0.06); }
+  .colleague-row.selected {
+    background: rgba(42,157,117,0.22);
+    border-color: rgba(42,157,117,0.45);
+  }
+  html[data-theme="dark"] .colleague-row.selected { background: rgba(123,232,185,0.2); border-color: rgba(123,232,185,0.4); }
+  .colleague-row__avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: white; font-weight: 600; font-size: 12px;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    flex-shrink: 0;
+  }
+  .colleague-row__body { flex: 1; min-width: 0; }
+  .colleague-row__name { font-size: 14px; font-weight: 600; }
+  .colleague-row__role { font-size: 12px; color: var(--fg-muted); margin-top: 1px; }
+  .check-box {
+    width: 22px; height: 22px;
+    border-radius: 7px;
+    border: 1.5px solid var(--glass-border);
+    background: rgba(255,255,255,0.25);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    transition: all 0.14s ease;
+  }
+  .colleague-row.selected .check-box {
+    background: var(--brand);
+    border-color: var(--brand);
+  }
+  .check-box svg { opacity: 0; }
+  .colleague-row.selected .check-box svg { opacity: 1; }
+
+  .sheet__scroll { max-height: 360px; overflow-y: auto; margin-bottom: 14px; padding-right: 4px; scrollbar-width: none; }
+  .sheet__scroll::-webkit-scrollbar { display: none; }
+
+  /* cluster highlight on desks */
+  .desk--cluster {
+    background: linear-gradient(135deg, #ffd57a, #ff9a3c) !important;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.7), 0 0 14px rgba(255,154,60,0.7) !important;
+    z-index: 4;
+    color: #3a1d05 !important;
+  }
+
+  /* === success overlay === */
+  .success {
+    position: absolute;
+    inset: 0;
+    z-index: 60;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(123,232,185,0.55), transparent 55%),
+      radial-gradient(circle at 80% 80%, rgba(196,168,255,0.55), transparent 55%),
+      radial-gradient(circle at 70% 30%, rgba(255,213,122,0.45), transparent 55%),
+      rgba(8, 32, 24, 0.25);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.32s ease;
+    overflow: hidden;
+  }
+  .success.open { opacity: 1; pointer-events: auto; }
+
+  .success__card {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 28px 24px 22px;
+    border-radius: 28px;
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    box-shadow: 0 20px 50px rgba(8,32,24,0.25), inset 0 1px 0 rgba(255,255,255,0.55);
+    max-width: 320px;
+    transform: scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.22, 1.2, 0.36, 1);
+  }
+  .success.open .success__card { transform: scale(1); }
+
+  .success__burst {
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg, #2a9d75, #006a4e);
+    color: white;
+    box-shadow:
+      0 10px 28px rgba(0,106,78,0.4),
+      0 0 0 8px rgba(123,232,185,0.35),
+      0 0 0 16px rgba(123,232,185,0.18);
+    animation: pop 0.6s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+  }
+  @keyframes pop {
+    0%   { transform: scale(0.2); opacity: 0; }
+    60%  { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  .success__yay {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 36px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .success__copy { font-size: 13px; color: var(--fg-muted); margin-bottom: 10px; }
+  .success__desk {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 44px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin: 4px 0 10px;
+    color: var(--brand-light);
+    font-variant-numeric: tabular-nums;
+  }
+  html[data-theme="dark"] .success__desk { color: #7be8b9; }
+  .success__meta {
+    font-size: 13px; color: var(--fg-muted);
+    margin-bottom: 20px;
+  }
+  .success__actions { display: flex; gap: 8px; }
+
+  /* confetti */
+  .confetti {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .confetti-piece {
+    position: absolute;
+    top: -24px;
+    width: 8px;
+    height: 12px;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .success.open .confetti-piece {
+    animation: confettiFall var(--dur, 3s) cubic-bezier(0.4, 0.6, 0.5, 1) var(--delay, 0s) both;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translate3d(0, -10px, 0) rotate(0deg); opacity: 0; }
+    8%   { opacity: 1; }
+    100% { transform: translate3d(var(--sway, 30px), 760px, 0) rotate(var(--spin, 720deg)); opacity: 1; }
+  }
+
+  /* === toast === */
+  .toast {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    padding: 12px 18px;
+    border-radius: 14px;
+    background: rgba(15, 42, 34, 0.85);
+    color: #f4fbf8;
+    font-size: 13px;
+    font-weight: 500;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.24s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex; align-items: center; gap: 10px;
+    max-width: 320px;
+    text-align: left;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast__icon {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(123,232,185,0.35); color: #7be8b9;
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+
+  .filter-row {
+    display: flex; gap: 8px; overflow-x: auto;
+    padding: 4px 0 10px; scrollbar-width: none;
+    margin-bottom: 6px;
+  }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.4);
+    font-size: 13px; font-weight: 500;
+    color: var(--fg);
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.14s ease;
+    white-space: nowrap;
+  }
+  html[data-theme="dark"] .chip { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+  .chip--active {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+    box-shadow: 0 4px 12px rgba(0,106,78,0.3);
+  }
+
+  .floor-card { margin-bottom: 14px; padding: 0; overflow: hidden; }
+  .floor-card__header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px 12px;
+  }
+  .floor-card__title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 18px; }
+  .floor-card__date { font-size: 12px; color: var(--fg-muted); }
+  .floor-map {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    margin: 0 14px 14px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.15));
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+  }
+  html[data-theme="dark"] .floor-map { background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); }
+
+  .floor-map::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.16) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.16) 0 1px, transparent 1px 28px);
+  }
+  .floor-map .wall {
+    position: absolute; background: rgba(255,255,255,0.55); border-radius: 4px;
+  }
+  html[data-theme="dark"] .floor-map .wall { background: rgba(255,255,255,0.25); }
+
+  .desk {
+    position: absolute;
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
+    border: 1.5px solid rgba(255,255,255,0.7);
+    display: grid; place-items: center;
+    font-size: 9px; font-weight: 700;
+    color: rgba(0,0,0,0.55);
+    font-family: 'Inter Tight', sans-serif;
+    user-select: none;
+  }
+  .desk--free  { background: linear-gradient(135deg, #7be8b9, #2a9d75); box-shadow: 0 0 10px rgba(42,157,117,0.55); color: #053a25; }
+  .desk--taken { background: rgba(180,180,180,0.6); border-color: rgba(255,255,255,0.5); color: rgba(0,0,0,0.45); }
+  .desk--mine  { background: linear-gradient(135deg, #ffd57a, #ff9a3c); box-shadow: 0 0 14px rgba(255,154,60,0.7); color: #3a1d05; }
+  .desk--team  { background: linear-gradient(135deg, #b0a8ff, #7d6dff); box-shadow: 0 0 12px rgba(125,109,255,0.5); color: #1a0e4a; }
+  .desk:hover  { transform: scale(1.15); z-index: 2; }
+  .desk--selected { transform: scale(1.25); box-shadow: 0 0 0 3px rgba(255,255,255,0.7), 0 0 14px rgba(0,106,78,0.6); z-index: 3; }
+
+  /* meeting room */
+  .room {
+    position: absolute;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1.5px solid rgba(255,255,255,0.7);
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
+    text-align: center; padding: 4px;
+    line-height: 1.1;
+  }
+  .room--free { background: linear-gradient(135deg, rgba(123,232,185,0.7), rgba(42,157,117,0.7)); color: #053a25; box-shadow: 0 0 12px rgba(42,157,117,0.4); }
+  .room--taken { background: rgba(180,180,180,0.55); color: rgba(0,0,0,0.55); }
+  .room:hover { transform: scale(1.04); }
+
+  .legend {
+    display: flex; gap: 14px; padding: 0 18px 14px;
+    flex-wrap: wrap; font-size: 11px;
+  }
+  .legend__item { display: flex; gap: 6px; align-items: center; color: var(--fg-muted); }
+  .legend__swatch { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* === BOOKINGS === */
+  .booking { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+  .booking__date {
+    text-align: center; width: 56px; flex-shrink: 0;
+    padding: 10px 0; border-radius: 14px;
+    background: rgba(255,255,255,0.35);
+    border: 1px solid var(--glass-border);
+  }
+  html[data-theme="dark"] .booking__date { background: rgba(255,255,255,0.08); }
+  .booking__date strong { font-family: 'Fraunces', serif; font-weight: 600; font-size: 20px; display: block; line-height: 1; }
+  .booking__date span { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted); }
+  .booking__body { flex: 1; }
+  .booking__where { font-weight: 600; font-size: 14px; }
+  .booking__when  { color: var(--fg-muted); font-size: 12px; margin-top: 2px; }
+  .booking__tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-top: 6px;
+    padding: 2px 8px; border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+    background: rgba(123,232,185,0.4);
+    color: #0a4a30;
+  }
+  html[data-theme="dark"] .booking__tag { background: rgba(123,232,185,0.25); color: #7be8b9; }
+
+  /* === TEAM === */
+  .team-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    margin-bottom: 10px;
+    backdrop-filter: blur(10px);
+  }
+  .team-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: white; font-weight: 600; font-size: 13px;
+    border: 1.5px solid rgba(255,255,255,0.6);
+  }
+  .team-info { flex: 1; }
+  .team-info strong { display: block; font-weight: 600; font-size: 14px; }
+  .team-info span { font-size: 12px; color: var(--fg-muted); }
+  .team-status { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+  .team-status--in { background: rgba(123,232,185,0.45); color: #0a4a30; }
+  .team-status--out { background: rgba(180,180,180,0.35); color: var(--fg-muted); }
+  html[data-theme="dark"] .team-status--in { background: rgba(123,232,185,0.25); color: #7be8b9; }
+
+  /* === PROFILE === */
+  .profile-hero { text-align: center; padding: 18px; margin-bottom: 16px; }
+  .profile-hero__avatar {
+    width: 84px; height: 84px; border-radius: 50%;
+    margin: 0 auto 10px;
+    background: linear-gradient(135deg, #2a9d75, #006a4e);
+    color: white;
+    display: grid; place-items: center;
+    font-family: 'Fraunces', serif;
+    font-size: 30px; font-weight: 600;
+    border: 2px solid rgba(255,255,255,0.6);
+    box-shadow: 0 10px 24px rgba(0,106,78,0.3);
+  }
+  .profile-hero h3 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; }
+  .profile-hero p { font-size: 13px; color: var(--fg-muted); margin-top: 4px; }
+
+  .pref-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .pref-row:last-child { border-bottom: none; }
+  .pref-row__label { font-size: 14px; font-weight: 500; }
+  .pref-row__sub { font-size: 12px; color: var(--fg-muted); margin-top: 2px; }
+  .toggle {
+    width: 44px; height: 26px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.35);
+    border: 1px solid var(--glass-border);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.18s ease;
+    flex-shrink: 0;
+  }
+  html[data-theme="dark"] .toggle { background: rgba(255,255,255,0.12); }
+  .toggle::after {
+    content: '';
+    position: absolute; top: 2px; left: 2px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+    transition: transform 0.18s ease;
+  }
+  .toggle--on { background: var(--brand); }
+  .toggle--on::after { transform: translateX(18px); }
+
+  /* === WAYFINDER === */
+  .wf-hero {
+    text-align: center;
+    padding: 22px;
+    background: linear-gradient(135deg, rgba(42,157,117,0.85), rgba(0,106,78,0.78));
+    color: white;
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+    border: 1px solid rgba(255,255,255,0.35);
+    box-shadow: 0 12px 30px rgba(0,106,78,0.35);
+  }
+  .wf-hero__label { font-size: 11px; opacity: 0.85; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+  .wf-hero__desk { font-family: 'Fraunces', serif; font-size: 44px; font-weight: 600; line-height: 1; margin: 6px 0; }
+  .wf-hero__meta { font-size: 13px; opacity: 0.9; }
+  .wf-step {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+  }
+  .wf-step__num {
+    flex-shrink: 0;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: white;
+    display: grid; place-items: center;
+    font-weight: 600;
+    font-size: 13px;
+    font-family: 'Fraunces', serif;
+  }
+  .wf-step__body { flex: 1; }
+  .wf-step__title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .wf-step__copy { font-size: 12px; color: var(--fg-muted); }
+  .wf-step__icon {
+    width: 36px; height: 36px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.4);
+    display: grid; place-items: center;
+    color: var(--brand);
+    flex-shrink: 0;
+  }
+  html[data-theme="dark"] .wf-step__icon { background: rgba(255,255,255,0.12); color: #7be8b9; }
+
+  .back-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+    padding: 0 4px;
+    cursor: pointer;
+    color: var(--fg-muted);
+    font-weight: 500;
+    font-size: 13px;
+    background: none; border: none;
+    font-family: inherit;
+  }
+  .back-row:hover { color: var(--fg); }
+
+  /* === bottom nav === */
+  .bottom-nav {
+    position: absolute;
+    bottom: 12px;
+    left: 12px; right: 12px;
+    height: 70px;
+    padding: 8px;
+    border-radius: 24px;
+    background: rgba(255,255,255,0.32);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: 0 12px 30px rgba(8,32,24,0.18), inset 0 1px 0 rgba(255,255,255,0.7);
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
+    z-index: 20;
+  }
+  html[data-theme="dark"] .bottom-nav { background: rgba(20,30,35,0.55); box-shadow: 0 12px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08); }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px;
+    border: none; background: transparent;
+    color: var(--fg-muted);
+    font-family: inherit; font-size: 10px; font-weight: 500;
+    cursor: pointer;
+    border-radius: 16px;
+    transition: all 0.14s ease;
+  }
+  .nav-item svg { width: 20px; height: 20px; }
+  .nav-item--active {
+    background: rgba(255,255,255,0.55);
+    color: var(--brand);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  html[data-theme="dark"] .nav-item--active { background: rgba(255,255,255,0.15); color: #7be8b9; box-shadow: none; }
+
+  /* === modal sheet === */
+  .scrim {
+    position: absolute; inset: 0;
+    background: rgba(8, 32, 24, 0.35);
+    backdrop-filter: blur(4px);
+    z-index: 30;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.24s ease;
+  }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  .sheet {
+    position: absolute;
+    left: 12px; right: 12px; bottom: 12px;
+    border-radius: 28px;
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.5);
+    padding: 22px;
+    z-index: 40;
+    transform: translateY(120%);
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    color: var(--fg);
+  }
+  html[data-theme="dark"] .sheet { background: rgba(25, 35, 40, 0.85); }
+  .sheet.open { transform: translateY(0); }
+  .sheet__handle {
+    width: 40px; height: 4px;
+    border-radius: 2px;
+    background: rgba(0,0,0,0.15);
+    margin: -8px auto 14px;
+  }
+  html[data-theme="dark"] .sheet__handle { background: rgba(255,255,255,0.18); }
+
+  .sheet__row { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
+  .sheet__avatar {
+    width: 56px; height: 56px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #2a9d75, #006a4e);
+    color: white;
+    display: grid; place-items: center;
+    font-family: 'Fraunces', serif;
+    font-size: 22px; font-weight: 600;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    flex-shrink: 0;
+  }
+  .sheet__desk-num {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #7be8b9, #2a9d75);
+    color: #053a25;
+    display: grid; place-items: center;
+    font-family: 'Fraunces', serif;
+    font-size: 17px; font-weight: 600;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    flex-shrink: 0;
+  }
+  .sheet__title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 18px; }
+  .sheet__sub { font-size: 12px; color: var(--fg-muted); margin-top: 2px; }
+  .sheet__amenities {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .amenity-pill {
+    padding: 6px 10px; border-radius: 10px;
+    background: rgba(255,255,255,0.4);
+    font-size: 12px; font-weight: 500;
+    border: 1px solid var(--glass-border);
+  }
+  html[data-theme="dark"] .amenity-pill { background: rgba(255,255,255,0.1); }
+  .sheet__actions { display: flex; gap: 8px; }
+
+  .sheet__note {
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    font-size: 12px;
+    margin-bottom: 14px;
+    color: var(--fg-muted);
+  }
+  html[data-theme="dark"] .sheet__note { background: rgba(255,255,255,0.06); }
+
+  ::-webkit-scrollbar { width: 0; height: 0; }
+
+  /* ===== larger text accessibility option ===== */
+  html.lt .sky-content h2          { font-size: 32px; }
+  html.lt .sky-content p           { font-size: 15px; }
+  html.lt .today-card__desk        { font-size: 46px; }
+  html.lt .today-card__label       { font-size: 12px; }
+  html.lt .today-card__meta        { font-size: 15px; }
+  html.lt .section-title           { font-size: 19px; }
+  html.lt .view h2                 { font-size: 30px; }
+  html.lt .view p                  { font-size: 15px; }
+  html.lt .chip                    { font-size: 15px; padding: 9px 16px; }
+  html.lt .btn                     { font-size: 16px; padding: 13px 20px; }
+  html.lt .qa__label               { font-size: 16px; }
+  html.lt .qa__sub                 { font-size: 14px; }
+  html.lt .floor-card__title       { font-size: 20px; }
+  html.lt .floor-card__date        { font-size: 14px; }
+  html.lt .legend                  { font-size: 12px; }
+  html.lt .desk                    { font-size: 10px; width: 30px; height: 30px; }
+  html.lt .booking__where          { font-size: 16px; }
+  html.lt .booking__when           { font-size: 14px; }
+  html.lt .booking__date strong    { font-size: 22px; }
+  html.lt .team-info strong        { font-size: 16px; }
+  html.lt .team-info span          { font-size: 14px; }
+  html.lt .team-status             { font-size: 12px; padding: 5px 12px; }
+  html.lt .pref-row__label         { font-size: 16px; }
+  html.lt .pref-row__sub           { font-size: 14px; }
+  html.lt .badge-pill              { font-size: 13px; padding: 6px 12px; }
+  html.lt .profile-hero h3         { font-size: 24px; }
+  html.lt .profile-hero p          { font-size: 14px; }
+  html.lt .wf-hero__desk           { font-size: 50px; }
+  html.lt .wf-hero__meta           { font-size: 15px; }
+  html.lt .wf-step__title          { font-size: 16px; }
+  html.lt .wf-step__copy           { font-size: 14px; }
+  html.lt .sheet__title            { font-size: 20px; }
+  html.lt .sheet__sub              { font-size: 14px; }
+  html.lt .amenity-pill            { font-size: 13px; padding: 7px 11px; }
+  html.lt .sheet__note             { font-size: 13px; }
+  html.lt .segmented__btn          { font-size: 14px; }
+  html.lt .nav-item                { font-size: 11px; }
+  html.lt .nav-item svg            { width: 22px; height: 22px; }
+  html.lt .back-row                { font-size: 14px; }
+  html.lt .colleague-row__name     { font-size: 16px; }
+  html.lt .colleague-row__role     { font-size: 14px; }
+  html.lt .booking-for__label      { font-size: 13px; }
+  html.lt .booking-for__value      { font-size: 16px; }
+</style>
+</head>
+<body>
+
+  <div class="intro">
+    <h1>Spaces<span style="color: var(--brand-light);">@</span>LBG</h1>
+    <p>Glassmorphism prototype — tap around to explore</p>
+  </div>
+
+  <div class="phone">
+    <div class="phone__screen">
+
+      <!-- status bar -->
+      <div class="status-bar">
+        <span id="statusTime">9:41</span>
+        <div class="status-bar__right">
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><path d="M1 8h2v1H1zm3-2h2v3H4zm3-2h2v5H7zm3-2h2v7h-2z"/></svg>
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><path d="M7 1a7 7 0 0 1 4.95 2.05l-.85.85A5.8 5.8 0 0 0 7 2.2 5.8 5.8 0 0 0 2.9 3.9l-.85-.85A7 7 0 0 1 7 1zm0 2.5a4.5 4.5 0 0 1 3.18 1.32l-.86.85A3.3 3.3 0 0 0 7 4.7c-.91 0-1.74.37-2.32.97l-.86-.85A4.5 4.5 0 0 1 7 3.5zM7 6a2 2 0 0 1 1.41.59l-1.41 1.4-1.42-1.4A2 2 0 0 1 7 6z"/></svg>
+          <svg width="20" height="10" viewBox="0 0 20 10" fill="currentColor"><rect x="0.5" y="0.5" width="17" height="9" rx="1.5" fill="none" stroke="currentColor"/><rect x="2" y="2" width="13" height="6" rx="0.5"/><rect x="18" y="3" width="1.5" height="4" rx="0.5"/></svg>
+        </div>
+      </div>
+
+      <!-- app bar -->
+      <header class="app-bar">
+        <div class="brand">
+          <span class="logo-horse" aria-hidden="true">
+            <img src="public/floorplans/horsey.jpeg" alt="Lloyds horse logo" />
+          </span>
+          <h1>Spaces<span class="at">@</span>LBG</h1>
+        </div>
+        <button class="avatar" onclick="go('profile')" aria-label="Open settings">AB</button>
+      </header>
+
+      <!-- ============ HOME ============ -->
+      <main class="view" id="view-home">
+        <!-- animated sky -->
+        <div class="sky-card" id="skyCard">
+          <div class="cloud cloud--1"></div>
+          <div class="cloud cloud--2"></div>
+          <div class="cloud cloud--3"></div>
+          <div class="star" style="top: 30px;  left: 40px;  animation-delay: 0s;"></div>
+          <div class="star" style="top: 50px;  left: 110px; animation-delay: 0.8s;"></div>
+          <div class="star" style="top: 25px;  left: 220px; animation-delay: 1.4s;"></div>
+          <div class="star" style="top: 80px;  left: 280px; animation-delay: 2.1s;"></div>
+          <div class="star" style="top: 65px;  left: 60px;  animation-delay: 0.4s;"></div>
+          <div class="star" style="top: 35px;  left: 320px; animation-delay: 1.7s;"></div>
+          <div class="sun"></div>
+          <div class="moon"></div>
+          <div class="sky-content">
+            <h2 id="greetingText">Good morning,<br/>Alice.</h2>
+            <p id="greetingSub">Tuesday, 12 May · London office</p>
+          </div>
+        </div>
+
+        <!-- Today's desk hero -->
+        <div class="glass glass--brand today-card">
+          <div class="today-card__row">
+            <span class="today-card__label">Today's desk</span>
+            <span class="badge-pill"><span class="dot"></span> Checked in</span>
+          </div>
+          <div class="today-card__desk">G&#8209;014</div>
+          <div class="today-card__meta">
+            <div><strong>Zone</strong> · Quiet wing</div>
+            <div><strong>09:00 – 17:00</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn--glass" style="flex:1;" onclick="go('wayfinder')">Find my desk</button>
+            <button class="btn btn--glass" style="flex:1;">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Wrap-up reminder -->
+        <div class="glass glass--amber" style="display:flex; gap:12px; align-items:flex-start; margin-bottom:14px;">
+          <div style="width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,0.45);flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7a3d00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:15px;margin-bottom:2px;">Your morning slot wraps up by 12:30</div>
+            <div style="font-size:13px;opacity:0.85;">Fancy a change of desk after lunch? Pick a new one in two taps.</div>
+            <div style="font-size:12px;font-weight:600;opacity:0.7;margin-top:6px;">58 min remaining</div>
+          </div>
+        </div>
+
+        <div class="section-title">Quick actions</div>
+        <div class="quick-actions">
+          <div class="qa" onclick="go('book')">
+            <div class="qa__icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
+            </div>
+            <div class="qa__label">Book a desk</div>
+            <div class="qa__sub">Up to 4 weeks ahead</div>
+          </div>
+          <div class="qa" onclick="sitWithTeam()">
+            <div class="qa__icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+            </div>
+            <div class="qa__label">Sit with team</div>
+            <div class="qa__sub">3 in office today</div>
+          </div>
+          <div class="qa" onclick="goAndRoom()">
+            <div class="qa__icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </div>
+            <div class="qa__label">Book a room</div>
+            <div class="qa__sub">For meetings</div>
+          </div>
+          <div class="qa" onclick="go('wayfinder')">
+            <div class="qa__icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="qa__label">Wayfinder</div>
+            <div class="qa__sub">Get to your desk</div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ============ BOOK ============ -->
+      <main class="view" id="view-book" hidden>
+        <div style="padding: 0 4px 8px;">
+          <h2 style="font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; letter-spacing: -0.02em;">Book a space</h2>
+          <p style="color: var(--fg-muted); font-size: 13px; margin-top: 2px;">Tuesday, 13 May · Ground floor</p>
+        </div>
+
+        <!-- Desk / Room segmented control -->
+        <div class="segmented" id="bookSegmented" data-active="desk">
+          <div class="segmented__indicator"></div>
+          <button class="segmented__btn segmented__btn--active" onclick="setBookMode('desk')">Book a desk</button>
+          <button class="segmented__btn" onclick="setBookMode('room')">Book a meeting space</button>
+        </div>
+
+        <!-- DESK MODE -->
+        <div id="bookDesk">
+          <!-- Booking for: row -->
+          <div class="booking-for" onclick="openColleaguesSheet()">
+            <div class="booking-for__icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="booking-for__text">
+              <div class="booking-for__label">Booking for</div>
+              <div class="booking-for__value" id="bookingForValue">Just me</div>
+            </div>
+            <div id="bookingForStack" class="avatar-stack"></div>
+            <svg class="booking-for__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+
+          <div class="filter-row">
+            <div class="chip chip--active">My needs</div>
+            <div class="chip">Low noise</div>
+            <div class="chip">Dual monitor</div>
+            <div class="chip">Standing</div>
+            <div class="chip">Near window</div>
+            <div class="chip">Accessible</div>
+          </div>
+
+          <div class="glass floor-card">
+            <div class="floor-card__header">
+              <div>
+                <div class="floor-card__title">Ground floor</div>
+                <div class="floor-card__date">42 free of 96 desks</div>
+              </div>
+              <button class="btn btn--outline" style="padding: 8px 12px; font-size: 12px;">Switch floor</button>
+            </div>
+
+            <div class="floor-map" id="floorMap">
+              <div class="wall" style="top:8%;  left:4%;  width:92%; height:2px;"></div>
+              <div class="wall" style="top:48%; left:4%;  width:42%; height:2px;"></div>
+              <div class="wall" style="top:8%;  left:50%; width:2px; height:84%;"></div>
+              <div class="wall" style="top:90%; left:4%;  width:92%; height:2px;"></div>
+              <!-- desks injected by JS -->
+            </div>
+
+            <div class="legend">
+              <div class="legend__item"><span class="legend__swatch" style="background: linear-gradient(135deg,#7be8b9,#2a9d75);"></span>Free</div>
+              <div class="legend__item"><span class="legend__swatch" style="background: rgba(150,150,150,0.55);"></span>Taken</div>
+              <div class="legend__item"><span class="legend__swatch" style="background: linear-gradient(135deg,#b0a8ff,#7d6dff);"></span>Teammate</div>
+              <div class="legend__item"><span class="legend__swatch" style="background: linear-gradient(135deg,#ffd57a,#ff9a3c);"></span>Selected</div>
+            </div>
+          </div>
+
+          <p style="font-size: 12px; color: var(--fg-muted); text-align: center; padding: 0 16px;">Tap any desk to see who's there or what's available.</p>
+        </div>
+
+        <!-- ROOM MODE -->
+        <div id="bookRoom" hidden>
+          <div class="filter-row">
+            <div class="chip chip--active">Any size</div>
+            <div class="chip">2–4 ppl</div>
+            <div class="chip">6–8 ppl</div>
+            <div class="chip">10+ ppl</div>
+            <div class="chip">Video conf</div>
+            <div class="chip">Whiteboard</div>
+          </div>
+
+          <div class="glass floor-card">
+            <div class="floor-card__header">
+              <div>
+                <div class="floor-card__title">1st floor · Meeting rooms</div>
+                <div class="floor-card__date">5 of 8 free now</div>
+              </div>
+              <button class="btn btn--outline" style="padding: 8px 12px; font-size: 12px;">Time</button>
+            </div>
+
+            <div class="floor-map" id="roomMap">
+              <div class="wall" style="top:8%; left:4%; width:92%; height:2px;"></div>
+              <div class="wall" style="top:90%; left:4%; width:92%; height:2px;"></div>
+              <div class="wall" style="top:50%; left:50%; width:2px; height:40%;"></div>
+
+              <div class="room room--free"  style="top:14%; left:8%;  width:38%; height:24%;" onclick="openRoomSheet('Beech', 6, 'free')">Beech<br/><span style="font-size:9px;opacity:0.7;font-weight:500;">6 ppl</span></div>
+              <div class="room room--taken" style="top:14%; left:54%; width:38%; height:24%;" onclick="openRoomSheet('Cedar', 4, 'taken')">Cedar<br/><span style="font-size:9px;opacity:0.7;font-weight:500;">4 ppl</span></div>
+              <div class="room room--free"  style="top:42%; left:8%;  width:38%; height:18%;" onclick="openRoomSheet('Oak',   8, 'free')">Oak<br/><span style="font-size:9px;opacity:0.7;font-weight:500;">8 ppl</span></div>
+              <div class="room room--free"  style="top:42%; left:54%; width:38%; height:18%;" onclick="openRoomSheet('Yew',  10, 'free')">Yew<br/><span style="font-size:9px;opacity:0.7;font-weight:500;">10 ppl</span></div>
+              <div class="room room--free"  style="top:64%; left:8%;  width:24%; height:22%;" onclick="openRoomSheet('Ash',   2, 'free')">Ash<br/><span style="font-size:9px;opacity:0.7;font-weight:500;">2 ppl</span></div>
+              <div class="room room--taken" style="top:64%; left:36%; width:24%; height:22%;" onclick="openRoomSheet('Pine',  4, 'taken')">Pine<br/><span style="font-size:9px;opacity:0.7;font-weight:500;">4 ppl</span></div>
+              <div class="room room--free"  style="top:64%; left:64%; width:28%; height:22%;" onclick="openRoomSheet('Maple', 12, 'free')">Maple<br/><span style="font-size:9px;opacity:0.7;font-weight:500;">12 ppl</span></div>
+            </div>
+
+            <div class="legend">
+              <div class="legend__item"><span class="legend__swatch" style="background: linear-gradient(135deg,#7be8b9,#2a9d75);"></span>Free</div>
+              <div class="legend__item"><span class="legend__swatch" style="background: rgba(150,150,150,0.55);"></span>Booked</div>
+            </div>
+          </div>
+
+          <p style="font-size: 12px; color: var(--fg-muted); text-align: center; padding: 0 16px;">Tap a room to see availability and book.</p>
+        </div>
+      </main>
+
+      <!-- ============ BOOKINGS ============ -->
+      <main class="view" id="view-bookings" hidden>
+        <div style="padding: 0 4px 14px;">
+          <h2 style="font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; letter-spacing: -0.02em;">My bookings</h2>
+          <p style="color: var(--fg-muted); font-size: 13px; margin-top: 2px;">3 upcoming · 12 past</p>
+        </div>
+
+        <div class="filter-row">
+          <div class="chip chip--active">Upcoming</div>
+          <div class="chip">Past</div>
+          <div class="chip">Cancelled</div>
+        </div>
+
+        <div class="glass" style="margin-bottom: 12px;">
+          <div class="booking">
+            <div class="booking__date"><strong>12</strong><span>Tue</span></div>
+            <div class="booking__body">
+              <div class="booking__where">Desk G‑014 · Ground floor</div>
+              <div class="booking__when">09:00 – 17:00 · London</div>
+              <span class="booking__tag">● Today · Checked in</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass" style="margin-bottom: 12px;">
+          <div class="booking">
+            <div class="booking__date"><strong>14</strong><span>Thu</span></div>
+            <div class="booking__body">
+              <div class="booking__where">Desk 1‑042 · First floor</div>
+              <div class="booking__when">09:00 – 17:00 · London</div>
+              <span class="booking__tag" style="background: rgba(176,168,255,0.45); color: #2a1a6b;">Anchor day · Sit with team</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass" style="margin-bottom: 12px;">
+          <div class="booking">
+            <div class="booking__date"><strong>19</strong><span>Tue</span></div>
+            <div class="booking__body">
+              <div class="booking__where">Room "Beech" · 1st floor</div>
+              <div class="booking__when">14:00 – 15:00 · 6 people</div>
+              <span class="booking__tag" style="background: rgba(255,213,122,0.5); color: #5c3500;">Meeting room</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">Recent</div>
+
+        <div class="glass glass--soft" style="margin-bottom: 10px;">
+          <div class="booking">
+            <div class="booking__date" style="opacity:0.7;"><strong>09</strong><span>Sat</span></div>
+            <div class="booking__body">
+              <div class="booking__where" style="opacity:0.8;">Desk G‑021 · Ground floor</div>
+              <div class="booking__when">09:00 – 17:00 · Last week</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass glass--soft">
+          <div class="booking">
+            <div class="booking__date" style="opacity:0.7;"><strong>07</strong><span>Thu</span></div>
+            <div class="booking__body">
+              <div class="booking__where" style="opacity:0.8;">Desk G‑014 · Ground floor</div>
+              <div class="booking__when">09:00 – 13:00 · Last week</div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ============ TEAM ============ -->
+      <main class="view" id="view-team" hidden>
+        <div style="padding: 0 4px 14px;">
+          <h2 style="font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; letter-spacing: -0.02em;">My team</h2>
+          <p style="color: var(--fg-muted); font-size: 13px; margin-top: 2px;">Platform Eng · London · 6 members</p>
+        </div>
+
+        <div class="glass" style="margin-bottom: 14px; display: flex; gap: 16px; align-items: center;">
+          <div>
+            <div style="font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600; line-height: 1;">3 / 6</div>
+            <div style="font-size: 12px; color: var(--fg-muted); margin-top: 4px;">In the office today</div>
+          </div>
+          <button class="btn btn--solid" style="margin-left: auto;" onclick="sitWithTeam()">Sit with team</button>
+        </div>
+
+        <div class="section-title">Today</div>
+
+        <div class="team-row">
+          <div class="team-avatar" style="background: linear-gradient(135deg, #ff9a8b, #ff6a88);">SP</div>
+          <div class="team-info"><strong>Sara Patel</strong><span>Engineering Manager · Desk G‑012</span></div>
+          <div class="team-status team-status--in">In</div>
+        </div>
+        <div class="team-row">
+          <div class="team-avatar" style="background: linear-gradient(135deg, #6fc7ff, #4d8eff);">MK</div>
+          <div class="team-info"><strong>Marcus Kim</strong><span>Senior SWE · Desk G‑015</span></div>
+          <div class="team-status team-status--in">In</div>
+        </div>
+        <div class="team-row">
+          <div class="team-avatar" style="background: linear-gradient(135deg, #c4a8ff, #7d6dff);">JO</div>
+          <div class="team-info"><strong>Jordan O'Hara</strong><span>SWE · Desk 1‑028</span></div>
+          <div class="team-status team-status--in">In</div>
+        </div>
+        <div class="team-row">
+          <div class="team-avatar" style="background: linear-gradient(135deg, #7be8b9, #2a9d75);">RH</div>
+          <div class="team-info"><strong>Rachel Hughes</strong><span>SWE · Remote</span></div>
+          <div class="team-status team-status--out">Out</div>
+        </div>
+        <div class="team-row">
+          <div class="team-avatar" style="background: linear-gradient(135deg, #ffd57a, #ff9a3c);">DN</div>
+          <div class="team-info"><strong>Devon Ng</strong><span>SWE · Annual leave</span></div>
+          <div class="team-status team-status--out">Out</div>
+        </div>
+      </main>
+
+      <!-- ============ WAYFINDER ============ -->
+      <main class="view" id="view-wayfinder" hidden>
+        <button class="back-row" onclick="go('home')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Back to home
+        </button>
+
+        <div class="wf-hero">
+          <div class="wf-hero__label">Heading to</div>
+          <div class="wf-hero__desk">G‑014</div>
+          <div class="wf-hero__meta">Ground floor · Quiet wing · ~2 min walk</div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-step__num">1</div>
+          <div class="wf-step__body">
+            <div class="wf-step__title">Enter the main lobby</div>
+            <div class="wf-step__copy">Tap your pass at the turnstiles on the right.</div>
+          </div>
+          <div class="wf-step__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-step__num">2</div>
+          <div class="wf-step__body">
+            <div class="wf-step__title">Walk straight past reception</div>
+            <div class="wf-step__copy">Keep the coffee bar on your left for 20 m.</div>
+          </div>
+          <div class="wf-step__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-step__num">3</div>
+          <div class="wf-step__body">
+            <div class="wf-step__title">Turn left at the breakout area</div>
+            <div class="wf-step__copy">You'll see the green planter wall.</div>
+          </div>
+          <div class="wf-step__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-step__num">4</div>
+          <div class="wf-step__body">
+            <div class="wf-step__title">Enter the Quiet wing</div>
+            <div class="wf-step__copy">Through the glass doors marked "Focus".</div>
+          </div>
+          <div class="wf-step__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/></svg>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-step__num">5</div>
+          <div class="wf-step__body">
+            <div class="wf-step__title">Your desk is on the right</div>
+            <div class="wf-step__copy">Desk G‑014 — by the window. Welcome in.</div>
+          </div>
+          <div class="wf-step__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+        </div>
+
+        <button class="btn btn--solid btn--full" style="margin-top: 8px;" onclick="go('home')">I've arrived</button>
+      </main>
+
+      <!-- ============ PROFILE ============ -->
+      <main class="view" id="view-profile" hidden>
+        <div class="glass profile-hero">
+          <div class="profile-hero__avatar">AB</div>
+          <h3>Alice Brown</h3>
+          <p>Senior SWE · Platform Eng · London</p>
+          <div style="display: flex; justify-content: center; gap: 8px; margin-top: 12px;">
+            <span class="badge-pill" style="background: rgba(123,232,185,0.45); color: #0a4a30; border-color: rgba(42,157,117,0.4);">● Anchor: Tue, Thu</span>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top: 4px;">Appearance</div>
+        <div class="glass">
+          <div class="pref-row">
+            <div>
+              <div class="pref-row__label">Dark mode</div>
+              <div class="pref-row__sub">Easier on the eyes after sunset</div>
+            </div>
+            <div class="toggle" id="darkToggle" onclick="toggleDark()"></div>
+          </div>
+          <div class="pref-row">
+            <div>
+              <div class="pref-row__label">Larger text</div>
+              <div class="pref-row__sub">Bump everything ~15% bigger</div>
+            </div>
+            <div class="toggle" id="largerTextToggle" onclick="toggleLargerText()"></div>
+          </div>
+        </div>
+
+        <div class="section-title">Check-in &amp; nudges</div>
+        <div class="glass">
+          <div class="pref-row">
+            <div>
+              <div class="pref-row__label">Auto check-in</div>
+              <div class="pref-row__sub">Geolocation only on booking days</div>
+            </div>
+            <div class="toggle toggle--on" onclick="this.classList.toggle('toggle--on')"></div>
+          </div>
+          <div class="pref-row">
+            <div>
+              <div class="pref-row__label">Wrap-up nudges</div>
+              <div class="pref-row__sub">1h before morning slot ends</div>
+            </div>
+            <div class="toggle toggle--on" onclick="this.classList.toggle('toggle--on')"></div>
+          </div>
+          <div class="pref-row">
+            <div>
+              <div class="pref-row__label">Outlook sync</div>
+              <div class="pref-row__sub">Add bookings to your calendar</div>
+            </div>
+            <div class="toggle toggle--on" onclick="this.classList.toggle('toggle--on')"></div>
+          </div>
+        </div>
+
+        <div class="section-title">My desk needs</div>
+        <div class="glass">
+          <div class="filter-row" style="margin: 0; padding: 0;">
+            <div class="chip chip--active">Low noise</div>
+            <div class="chip chip--active">Dual monitor</div>
+            <div class="chip chip--active">Near window</div>
+            <div class="chip">Standing</div>
+            <div class="chip">+ Add</div>
+          </div>
+        </div>
+
+        <div class="section-title">Account</div>
+        <div class="glass">
+          <div class="pref-row">
+            <div>
+              <div class="pref-row__label">Sign out</div>
+              <div class="pref-row__sub">alice.brown@lloydsbanking.com</div>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        </div>
+      </main>
+
+      <!-- ============ BOTTOM NAV ============ -->
+      <nav class="bottom-nav">
+        <button class="nav-item nav-item--active" data-route="home" onclick="go('home')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12 L12 4 L21 12"/><path d="M5 10v10h14V10"/></svg>
+          Home
+        </button>
+        <button class="nav-item" data-route="book" onclick="go('book')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
+          Book
+        </button>
+        <button class="nav-item" data-route="bookings" onclick="go('bookings')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Bookings
+        </button>
+        <button class="nav-item" data-route="team" onclick="go('team')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+          Team
+        </button>
+        <button class="nav-item" data-route="profile" onclick="go('profile')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          Profile
+        </button>
+      </nav>
+
+      <!-- ============ SCRIM + SHEET ============ -->
+      <div class="scrim" id="scrim" onclick="closeSheet()"></div>
+      <div class="sheet" id="sheet">
+        <div class="sheet__handle"></div>
+        <div id="sheetBody"></div>
+      </div>
+
+      <!-- ============ TOAST ============ -->
+      <div class="toast" id="toast">
+        <div class="toast__icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <span id="toastMsg">Done</span>
+      </div>
+
+      <!-- ============ SUCCESS OVERLAY ============ -->
+      <div class="success" id="success">
+        <div class="confetti" id="confetti"></div>
+        <div class="success__card">
+          <div class="success__burst">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <h2 class="success__yay">Yay!</h2>
+          <p class="success__copy">You're booked into</p>
+          <div class="success__desk" id="successDesk">G‑014</div>
+          <p class="success__meta" id="successMeta">Ground floor · Tue 13 May · 09:00–17:00</p>
+          <div class="success__actions">
+            <button class="btn btn--outline" style="flex:1;" onclick="closeSuccess()">Done</button>
+            <button class="btn btn--solid" style="flex:1;" onclick="closeSuccess(); go('wayfinder');">Find my desk</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <p style="color: var(--fg-muted); font-size: 12px; text-align: center; max-width: 380px;">
+    Tap desks to inspect • toggle dark mode on Profile • tap "Find my desk" for the wayfinder
+  </p>
+
+<script>
+  // ============ DATA ============
+  // Desk grid; each desk has number, x%/y%, status, amenities, optional occupant
+  const DESKS = [
+    // upper-left quad
+    { num: 'G-001', x: 10, y: 14, status: 'free',  amenities: ['Low noise', 'Dual monitor'] },
+    { num: 'G-002', x: 20, y: 14, status: 'free',  amenities: ['Dual monitor', 'Standing'] },
+    { num: 'G-003', x: 30, y: 14, status: 'taken', amenities: ['Low noise', 'Window'], occupant: { name: 'Sara Patel', title: 'Engineering Manager · Platform Eng', initials: 'SP', tone: 'linear-gradient(135deg,#ff9a8b,#ff6a88)' } },
+    { num: 'G-004', x: 40, y: 14, status: 'free',  amenities: ['Standing', 'Window'] },
+    { num: 'G-014', x: 12, y: 24, status: 'mine',  amenities: ['Low noise', 'Dual monitor', 'Window'] },
+    { num: 'G-015', x: 22, y: 24, status: 'free',  amenities: ['Dual monitor'] },
+    { num: 'G-012', x: 32, y: 24, status: 'team',  amenities: ['Low noise'], occupant: { name: 'Marcus Kim', title: 'Senior SWE · Platform Eng', initials: 'MK', tone: 'linear-gradient(135deg,#6fc7ff,#4d8eff)' } },
+    { num: 'G-016', x: 42, y: 24, status: 'free',  amenities: ['Accessible', 'Dual monitor'] },
+    { num: 'G-021', x: 14, y: 34, status: 'free',  amenities: ['Low noise', 'Window'] },
+    { num: 'G-022', x: 24, y: 34, status: 'taken', amenities: ['Dual monitor'], occupant: { name: 'Priya Shah', title: 'Risk Analyst · Credit Risk', initials: 'PS', tone: 'linear-gradient(135deg,#c4a8ff,#7d6dff)' } },
+    { num: 'G-023', x: 34, y: 34, status: 'free',  amenities: ['Standing'] },
+    { num: 'G-024', x: 44, y: 34, status: 'team',  amenities: ['Dual monitor', 'Window'], occupant: { name: 'Jordan O\'Hara', title: 'SWE · Platform Eng', initials: 'JO', tone: 'linear-gradient(135deg,#c4a8ff,#7d6dff)' } },
+    // upper-right
+    { num: 'G-031', x: 58, y: 14, status: 'free',  amenities: ['Low noise', 'Window'] },
+    { num: 'G-032', x: 70, y: 14, status: 'free',  amenities: ['Standing'] },
+    { num: 'G-033', x: 82, y: 14, status: 'taken', amenities: ['Dual monitor'], occupant: { name: 'Hassan Ali', title: 'Product Manager · Mortgages', initials: 'HA', tone: 'linear-gradient(135deg,#7be8b9,#2a9d75)' } },
+    { num: 'G-034', x: 58, y: 26, status: 'free',  amenities: ['Accessible'] },
+    { num: 'G-035', x: 70, y: 26, status: 'free',  amenities: ['Low noise'] },
+    { num: 'G-036', x: 82, y: 26, status: 'free',  amenities: ['Window'] },
+    { num: 'G-037', x: 58, y: 38, status: 'team',  amenities: ['Low noise', 'Dual monitor'], occupant: { name: 'Rachel Hughes', title: 'SWE · Platform Eng', initials: 'RH', tone: 'linear-gradient(135deg,#7be8b9,#2a9d75)' } },
+    { num: 'G-038', x: 70, y: 38, status: 'free',  amenities: ['Standing', 'Window'] },
+    { num: 'G-039', x: 82, y: 38, status: 'free',  amenities: ['Dual monitor'] },
+    // lower-left
+    { num: 'G-051', x: 14, y: 60, status: 'free',  amenities: ['Low noise', 'Dual monitor'] },
+    { num: 'G-052', x: 24, y: 60, status: 'taken', amenities: ['Window'], occupant: { name: 'Devon Ng', title: 'SWE · Platform Eng', initials: 'DN', tone: 'linear-gradient(135deg,#ffd57a,#ff9a3c)' } },
+    { num: 'G-053', x: 34, y: 60, status: 'free',  amenities: ['Standing'] },
+    { num: 'G-054', x: 44, y: 60, status: 'free',  amenities: ['Accessible', 'Window'] },
+    { num: 'G-061', x: 16, y: 72, status: 'free',  amenities: ['Dual monitor'] },
+    { num: 'G-062', x: 28, y: 72, status: 'free',  amenities: ['Low noise'] },
+    { num: 'G-063', x: 40, y: 72, status: 'free',  amenities: ['Window'] },
+    // lower-right
+    { num: 'G-071', x: 58, y: 60, status: 'free',  amenities: ['Standing'] },
+    { num: 'G-072', x: 70, y: 60, status: 'taken', amenities: ['Dual monitor'], occupant: { name: 'Aisha Khan', title: 'Senior Designer · Digital', initials: 'AK', tone: 'linear-gradient(135deg,#ff9a8b,#ff6a88)' } },
+    { num: 'G-073', x: 82, y: 60, status: 'free',  amenities: ['Window'] },
+    { num: 'G-074', x: 58, y: 72, status: 'free',  amenities: ['Low noise', 'Dual monitor'] },
+    { num: 'G-075', x: 70, y: 72, status: 'free',  amenities: ['Standing', 'Accessible'] },
+    { num: 'G-076', x: 82, y: 72, status: 'free',  amenities: ['Window', 'Dual monitor'] },
+  ];
+
+  // teammates available to book on behalf of
+  const COLLEAGUES = [
+    { id: 'sp', name: 'Sara Patel',    role: 'Engineering Manager', initials: 'SP', tone: 'linear-gradient(135deg,#ff9a8b,#ff6a88)' },
+    { id: 'mk', name: 'Marcus Kim',    role: 'Senior SWE',           initials: 'MK', tone: 'linear-gradient(135deg,#6fc7ff,#4d8eff)' },
+    { id: 'jo', name: "Jordan O'Hara", role: 'SWE',                  initials: 'JO', tone: 'linear-gradient(135deg,#c4a8ff,#7d6dff)' },
+    { id: 'rh', name: 'Rachel Hughes', role: 'SWE',                  initials: 'RH', tone: 'linear-gradient(135deg,#7be8b9,#2a9d75)' },
+    { id: 'dn', name: 'Devon Ng',      role: 'SWE',                  initials: 'DN', tone: 'linear-gradient(135deg,#ffd57a,#ff9a3c)' },
+    { id: 'ak', name: 'Aisha Khan',    role: 'Senior Designer',      initials: 'AK', tone: 'linear-gradient(135deg,#ff9a8b,#ff6a88)' },
+  ];
+  let selectedColleagues = new Set();
+
+  const ROOMS = {
+    Beech: { capacity: 6,  amenities: ['Video conf', 'Whiteboard', 'Dial-in'],  status: 'free',  booker: null },
+    Cedar: { capacity: 4,  amenities: ['Whiteboard'],                           status: 'taken', booker: { team: 'Mortgages weekly', org: 'Hassan Ali', until: '15:00' } },
+    Oak:   { capacity: 8,  amenities: ['Video conf', 'Whiteboard'],             status: 'free',  booker: null },
+    Yew:   { capacity: 10, amenities: ['Video conf', 'Large display'],          status: 'free',  booker: null },
+    Ash:   { capacity: 2,  amenities: ['Quiet booth'],                          status: 'free',  booker: null },
+    Pine:  { capacity: 4,  amenities: ['Whiteboard', 'Video conf'],             status: 'taken', booker: { team: 'Risk standup', org: 'Priya Shah', until: '14:30' } },
+    Maple: { capacity: 12, amenities: ['Video conf', 'Large display', 'Catering'], status: 'free', booker: null }
+  };
+
+  // ============ ROUTING ============
+  function go(route) {
+    document.querySelectorAll('.view').forEach(v => v.hidden = (v.id !== 'view-' + route));
+    document.querySelectorAll('.nav-item').forEach(b => {
+      b.classList.toggle('nav-item--active', b.dataset.route === route);
+    });
+    const view = document.getElementById('view-' + route);
+    if (view) view.scrollTop = 0;
+    closeSheet();
+  }
+
+  function goAndRoom() {
+    go('book');
+    setBookMode('room');
+  }
+
+  // ============ BOOK MODE TOGGLE ============
+  function setBookMode(mode) {
+    const seg = document.getElementById('bookSegmented');
+    seg.dataset.active = mode;
+    seg.querySelectorAll('.segmented__btn').forEach((b, i) => {
+      b.classList.toggle('segmented__btn--active', (i === 0 && mode === 'desk') || (i === 1 && mode === 'room'));
+    });
+    document.getElementById('bookDesk').hidden = mode !== 'desk';
+    document.getElementById('bookRoom').hidden = mode !== 'room';
+  }
+
+  // ============ FLOOR MAP RENDERING ============
+  function renderDesks() {
+    const map = document.getElementById('floorMap');
+    DESKS.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'desk desk--' + d.status;
+      el.style.left = d.x + '%';
+      el.style.top  = d.y + '%';
+      el.textContent = d.num.replace('G-', '');
+      el.dataset.num = d.num;
+      el.addEventListener('click', () => openDeskSheet(d.num));
+      map.appendChild(el);
+    });
+  }
+
+  // ============ SHEET ============
+  function openDeskSheet(num) {
+    const d = DESKS.find(x => x.num === num);
+    if (!d) return;
+    const body = document.getElementById('sheetBody');
+    let html = '';
+
+    if (d.status === 'free') {
+      html = `
+        <div class="sheet__row">
+          <div class="sheet__desk-num">${num.replace('G-','')}</div>
+          <div style="flex:1;">
+            <div class="sheet__title">Desk ${num}</div>
+            <div class="sheet__sub">Ground floor · Available now</div>
+          </div>
+          <span class="badge-pill" style="background: rgba(123,232,185,0.45); color: #0a4a30; border-color: rgba(42,157,117,0.4);"><span class="dot"></span>Free</span>
+        </div>
+        <div style="font-size: 12px; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;">Amenities</div>
+        <div class="sheet__amenities">
+          ${d.amenities.map(a => `<span class="amenity-pill">${a}</span>`).join('')}
+        </div>
+        <div class="sheet__actions">
+          <button class="btn btn--outline" style="flex:1;" onclick="closeSheet()">Cancel</button>
+          <button class="btn btn--solid" style="flex:2;" onclick="bookDesk('${num}')">Book ${num}</button>
+        </div>
+      `;
+    } else if (d.status === 'mine') {
+      html = `
+        <div class="sheet__row">
+          <div class="sheet__desk-num" style="background: linear-gradient(135deg,#ffd57a,#ff9a3c); color:#3a1d05;">${num.replace('G-','')}</div>
+          <div style="flex:1;">
+            <div class="sheet__title">Desk ${num}</div>
+            <div class="sheet__sub">Your booking · 09:00 – 17:00</div>
+          </div>
+          <span class="badge-pill" style="background: rgba(255,213,122,0.5); color: #5c3500; border-color: rgba(255,154,60,0.4);">Yours</span>
+        </div>
+        <div class="sheet__amenities">
+          ${d.amenities.map(a => `<span class="amenity-pill">${a}</span>`).join('')}
+        </div>
+        <div class="sheet__actions">
+          <button class="btn btn--outline" style="flex:1;" onclick="closeSheet()">Close</button>
+          <button class="btn btn--solid" style="flex:2;" onclick="go('wayfinder')">Find this desk</button>
+        </div>
+      `;
+    } else {
+      const o = d.occupant || { name: 'Booked', title: 'Colleague', initials: '··', tone: 'linear-gradient(135deg,#aaa,#888)' };
+      const teammate = d.status === 'team';
+      html = `
+        <div class="sheet__row">
+          <div class="sheet__avatar" style="background: ${o.tone};">${o.initials}</div>
+          <div style="flex:1;">
+            <div class="sheet__title">${o.name}</div>
+            <div class="sheet__sub">${o.title}</div>
+          </div>
+          <span class="badge-pill" style="background: ${teammate ? 'rgba(176,168,255,0.45)' : 'rgba(150,150,150,0.45)'}; color: ${teammate ? '#2a1a6b' : 'inherit'}; border: 1px solid var(--glass-border);">${teammate ? 'Teammate' : 'Taken'}</span>
+        </div>
+        <div class="sheet__note">
+          Sitting at <strong>Desk ${num}</strong> · Ground floor today, 09:00 – 17:00.
+        </div>
+        <div style="font-size: 12px; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;">Desk amenities</div>
+        <div class="sheet__amenities">
+          ${d.amenities.map(a => `<span class="amenity-pill">${a}</span>`).join('')}
+        </div>
+        <div class="sheet__actions">
+          <button class="btn btn--outline" style="flex:1;" onclick="closeSheet()">Close</button>
+          ${teammate ? `<button class="btn btn--solid" style="flex:2;" onclick="closeSheet()">Sit nearby</button>` : `<button class="btn btn--solid" style="flex:2;" onclick="closeSheet()">Request swap</button>`}
+        </div>
+      `;
+    }
+
+    body.innerHTML = html;
+    document.getElementById('sheet').classList.add('open');
+    document.getElementById('scrim').classList.add('open');
+  }
+
+  function openRoomSheet(name, capacity, status) {
+    const r = ROOMS[name];
+    const body = document.getElementById('sheetBody');
+    let html = '';
+
+    if (status === 'free') {
+      html = `
+        <div class="sheet__row">
+          <div class="sheet__desk-num" style="font-size:14px;">${name.slice(0,2).toUpperCase()}</div>
+          <div style="flex:1;">
+            <div class="sheet__title">${name}</div>
+            <div class="sheet__sub">1st floor · Up to ${capacity} people</div>
+          </div>
+          <span class="badge-pill" style="background: rgba(123,232,185,0.45); color: #0a4a30; border-color: rgba(42,157,117,0.4);"><span class="dot"></span>Free</span>
+        </div>
+        <div style="font-size: 12px; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;">Includes</div>
+        <div class="sheet__amenities">
+          ${r.amenities.map(a => `<span class="amenity-pill">${a}</span>`).join('')}
+        </div>
+        <div class="sheet__actions">
+          <button class="btn btn--outline" style="flex:1;" onclick="closeSheet()">Cancel</button>
+          <button class="btn btn--solid" style="flex:2;" onclick="closeSheet()">Book ${name} · 14:00–15:00</button>
+        </div>
+      `;
+    } else {
+      const b = r.booker;
+      html = `
+        <div class="sheet__row">
+          <div class="sheet__desk-num" style="background: rgba(180,180,180,0.55); color:#333; font-size:14px;">${name.slice(0,2).toUpperCase()}</div>
+          <div style="flex:1;">
+            <div class="sheet__title">${name}</div>
+            <div class="sheet__sub">1st floor · ${capacity} people</div>
+          </div>
+          <span class="badge-pill" style="background: rgba(150,150,150,0.45); border-color: var(--glass-border);">Booked</span>
+        </div>
+        <div class="sheet__note">
+          <strong>${b.team}</strong> · organised by ${b.org} · until ${b.until}
+        </div>
+        <div class="sheet__amenities">
+          ${r.amenities.map(a => `<span class="amenity-pill">${a}</span>`).join('')}
+        </div>
+        <div class="sheet__actions">
+          <button class="btn btn--outline" style="flex:1;" onclick="closeSheet()">Close</button>
+          <button class="btn btn--solid" style="flex:2;" onclick="closeSheet()">Book later slot</button>
+        </div>
+      `;
+    }
+    body.innerHTML = html;
+    document.getElementById('sheet').classList.add('open');
+    document.getElementById('scrim').classList.add('open');
+  }
+
+  function bookDesk(num) {
+    closeSheet();
+    // mark visual selection on the map
+    document.querySelectorAll('.desk--selected').forEach(s => s.classList.remove('desk--selected'));
+    const el = document.querySelector(`.desk[data-num="${num}"]`);
+    if (el) el.classList.add('desk--selected');
+    // show confirmation
+    showSuccess(num);
+  }
+
+  // ============ SUCCESS + CONFETTI ============
+  const CONFETTI_COLORS = ['#2a9d75', '#7be8b9', '#ff9a8b', '#ffd57a', '#c4a8ff', '#6fc7ff', '#ff9a3c'];
+  const CONFETTI_SHAPES = ['rect', 'circle', 'ribbon'];
+
+  function buildConfetti() {
+    const wrap = document.getElementById('confetti');
+    wrap.innerHTML = '';
+    const N = 40;
+    for (let i = 0; i < N; i++) {
+      const piece = document.createElement('span');
+      piece.className = 'confetti-piece';
+      const shape = CONFETTI_SHAPES[i % CONFETTI_SHAPES.length];
+      const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+      const left = Math.random() * 100;
+      const sway = (Math.random() * 120 - 60) + 'px';
+      const dur  = (2.4 + Math.random() * 2.6) + 's';
+      const delay = (Math.random() * 0.8) + 's';
+      const spin = (360 + Math.random() * 720) + 'deg';
+      const size = 6 + Math.random() * 8;
+
+      piece.style.left = left + '%';
+      piece.style.setProperty('--sway', sway);
+      piece.style.setProperty('--dur', dur);
+      piece.style.setProperty('--delay', delay);
+      piece.style.setProperty('--spin', spin);
+
+      if (shape === 'rect') {
+        piece.style.width = size + 'px';
+        piece.style.height = (size * 1.6) + 'px';
+        piece.style.background = color;
+        piece.style.borderRadius = '2px';
+      } else if (shape === 'circle') {
+        piece.style.width = size + 'px';
+        piece.style.height = size + 'px';
+        piece.style.background = color;
+        piece.style.borderRadius = '50%';
+      } else { // ribbon
+        piece.style.width = (size * 0.6) + 'px';
+        piece.style.height = (size * 2.4) + 'px';
+        piece.style.background = color;
+        piece.style.borderRadius = '3px';
+        piece.style.boxShadow = `0 0 6px ${color}66`;
+      }
+      wrap.appendChild(piece);
+    }
+  }
+
+  function showSuccess(num) {
+    document.getElementById('successDesk').textContent = num;
+    const d = new Date();
+    const day = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    document.getElementById('successMeta').textContent = `Ground floor · ${day} · 09:00–17:00`;
+    buildConfetti();
+    document.getElementById('success').classList.add('open');
+  }
+
+  function closeSuccess() {
+    document.getElementById('success').classList.remove('open');
+  }
+
+  function closeSheet() {
+    document.getElementById('sheet').classList.remove('open');
+    document.getElementById('scrim').classList.remove('open');
+  }
+
+  // ============ COLLEAGUE PICKER ============
+  function openColleaguesSheet() {
+    const body = document.getElementById('sheetBody');
+    const rows = COLLEAGUES.map(c => `
+      <div class="colleague-row ${selectedColleagues.has(c.id) ? 'selected' : ''}" data-id="${c.id}" onclick="toggleColleague('${c.id}')">
+        <div class="colleague-row__avatar" style="background: ${c.tone};">${c.initials}</div>
+        <div class="colleague-row__body">
+          <div class="colleague-row__name">${c.name}</div>
+          <div class="colleague-row__role">${c.role}</div>
+        </div>
+        <div class="check-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+      </div>
+    `).join('');
+
+    body.innerHTML = `
+      <div class="sheet__row" style="margin-bottom: 6px;">
+        <div style="flex:1;">
+          <div class="sheet__title">Book for your team</div>
+          <div class="sheet__sub" id="pickerSub">Pick teammates — we'll find a cluster of desks together</div>
+        </div>
+      </div>
+      <div class="sheet__scroll">${rows}</div>
+      <div class="sheet__actions">
+        <button class="btn btn--outline" style="flex:1;" onclick="clearColleagues()">Just me</button>
+        <button class="btn btn--solid" style="flex:2;" onclick="confirmColleagues()">Find seats together</button>
+      </div>
+    `;
+    updatePickerSub();
+    document.getElementById('sheet').classList.add('open');
+    document.getElementById('scrim').classList.add('open');
+  }
+
+  function toggleColleague(id) {
+    if (selectedColleagues.has(id)) selectedColleagues.delete(id);
+    else selectedColleagues.add(id);
+    const row = document.querySelector(`.colleague-row[data-id="${id}"]`);
+    if (row) row.classList.toggle('selected', selectedColleagues.has(id));
+    updatePickerSub();
+  }
+
+  function updatePickerSub() {
+    const sub = document.getElementById('pickerSub');
+    if (!sub) return;
+    const n = selectedColleagues.size;
+    sub.textContent = n === 0
+      ? "Pick teammates — we'll find a cluster of desks together"
+      : `${n} teammate${n === 1 ? '' : 's'} selected · you + ${n} = ${n + 1} seats`;
+  }
+
+  function clearColleagues() {
+    selectedColleagues.clear();
+    updateBookingForRow();
+    clearCluster();
+    closeSheet();
+  }
+
+  function confirmColleagues() {
+    updateBookingForRow();
+    allocateCluster();
+    closeSheet();
+  }
+
+  function updateBookingForRow() {
+    const val = document.getElementById('bookingForValue');
+    const stack = document.getElementById('bookingForStack');
+    const ids = [...selectedColleagues];
+    if (ids.length === 0) {
+      val.textContent = 'Just me';
+      stack.innerHTML = '';
+      return;
+    }
+    const cols = ids.map(id => COLLEAGUES.find(c => c.id === id));
+    val.textContent = ids.length === 1
+      ? `You + ${cols[0].name.split(' ')[0]}`
+      : `You + ${ids.length} colleagues`;
+
+    // render avatar pills (cap at 4 shown)
+    const shown = cols.slice(0, 4);
+    const overflow = cols.length - shown.length;
+    let html = shown.map(c => `<span class="avatar-stack__pill" style="background: ${c.tone};">${c.initials}</span>`).join('');
+    if (overflow > 0) {
+      html += `<span class="avatar-stack__pill" style="background: rgba(0,0,0,0.45); font-size: 9px;">+${overflow}</span>`;
+    }
+    stack.innerHTML = html;
+  }
+
+  function allocateCluster() {
+    clearCluster();
+    const total = selectedColleagues.size + 1; // me + teammates
+    if (total < 2) return;
+
+    // pick a contiguous-feeling cluster of free desks
+    const free = DESKS.filter(d => d.status === 'free' || d.status === 'mine');
+    // group by row-y bucket then pick rows that have enough free desks horizontally
+    const byRow = {};
+    free.forEach(d => {
+      const key = Math.round(d.y / 6) * 6;
+      (byRow[key] = byRow[key] || []).push(d);
+    });
+    // sort each row by x
+    Object.values(byRow).forEach(r => r.sort((a, b) => a.x - b.x));
+
+    // find first row with at least `total` desks (or pad with neighbouring row)
+    let cluster = [];
+    for (const key of Object.keys(byRow)) {
+      if (byRow[key].length >= total) { cluster = byRow[key].slice(0, total); break; }
+    }
+    // fallback: spread across rows
+    if (cluster.length === 0) cluster = free.slice(0, total);
+
+    cluster.forEach(d => {
+      const el = document.querySelector(`.desk[data-num="${d.num}"]`);
+      if (el) el.classList.add('desk--cluster');
+    });
+  }
+
+  function clearCluster() {
+    document.querySelectorAll('.desk--cluster').forEach(d => d.classList.remove('desk--cluster'));
+  }
+
+  // ============ SIT WITH TEAM ============
+  // teammates marked "In" in the Team view today
+  const IN_OFFICE_TODAY = ['sp', 'mk', 'jo'];
+
+  function sitWithTeam() {
+    // pre-select everyone in the office today
+    selectedColleagues = new Set(IN_OFFICE_TODAY);
+
+    // jump to Book → Desk
+    go('book');
+    setBookMode('desk');
+
+    // update the "Booking for" row + cluster on the map
+    updateBookingForRow();
+    allocateCluster();
+
+    // toast confirmation
+    const names = IN_OFFICE_TODAY
+      .map(id => COLLEAGUES.find(c => c.id === id))
+      .filter(Boolean);
+    const firstNames = names.map(c => c.name.split(' ')[0]);
+    const list = firstNames.length <= 2
+      ? firstNames.join(' and ')
+      : firstNames.slice(0, -1).join(', ') + ' and ' + firstNames.at(-1);
+    showToast(`Found ${names.length + 1} seats together for you, ${list}`);
+  }
+
+  // ============ TOAST ============
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  // ============ DARK MODE ============
+  function toggleDark() {
+    const html = document.documentElement;
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    document.getElementById('darkToggle').classList.toggle('toggle--on', next === 'dark');
+    try { localStorage.setItem('lbg_theme', next); } catch (e) {}
+  }
+
+  function initDark() {
+    let saved = null;
+    try { saved = localStorage.getItem('lbg_theme'); } catch (e) {}
+    if (saved === 'dark') {
+      document.documentElement.dataset.theme = 'dark';
+      document.getElementById('darkToggle').classList.add('toggle--on');
+    }
+  }
+
+  // ============ LARGER TEXT ============
+  function toggleLargerText() {
+    const html = document.documentElement;
+    const next = !html.classList.contains('lt');
+    html.classList.toggle('lt', next);
+    document.getElementById('largerTextToggle').classList.toggle('toggle--on', next);
+    try { localStorage.setItem('lbg_larger_text', next ? '1' : '0'); } catch (e) {}
+  }
+
+  function initLargerText() {
+    let saved = null;
+    try { saved = localStorage.getItem('lbg_larger_text'); } catch (e) {}
+    if (saved === '1') {
+      document.documentElement.classList.add('lt');
+      document.getElementById('largerTextToggle').classList.add('toggle--on');
+    }
+  }
+
+  // ============ ANIMATED SKY ============
+  function setSky() {
+    const hour = new Date().getHours();
+    const sky = document.getElementById('skyCard');
+    const greet = document.getElementById('greetingText');
+    const sub = document.getElementById('greetingSub');
+    let mood, hello;
+    if (hour >= 5 && hour < 11) { mood = 'morning'; hello = 'Good morning,<br/>Alice.'; }
+    else if (hour >= 11 && hour < 17) { mood = 'day'; hello = 'Good afternoon,<br/>Alice.'; }
+    else if (hour >= 17 && hour < 21) { mood = 'evening'; hello = 'Good evening,<br/>Alice.'; }
+    else { mood = 'night'; hello = 'Working late,<br/>Alice?'; }
+
+    sky.classList.remove('morning', 'day', 'evening', 'night');
+    sky.classList.add(mood);
+    greet.innerHTML = hello;
+
+    const d = new Date();
+    const day = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+    sub.textContent = `${day} · London office`;
+  }
+
+  function setStatusTime() {
+    const d = new Date();
+    const h = d.getHours();
+    const m = d.getMinutes().toString().padStart(2, '0');
+    document.getElementById('statusTime').textContent = `${h}:${m}`;
+  }
+
+  // ============ chip toggles + general bindings ============
+  document.querySelectorAll('.chip').forEach(c => {
+    c.addEventListener('click', () => c.classList.toggle('chip--active'));
+  });
+
+  // ============ INIT ============
+  renderDesks();
+  initDark();
+  initLargerText();
+  setSky();
+  setStatusTime();
+</script>
+</body>
+</html>
