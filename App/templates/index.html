@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Find My Desk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body data-initial-view="{{ initial_view|default('bookings') }}">
+    <div class="grain"></div>
+    <main class="shell">
+        <nav class="top-nav card">
+            <div class="brand-block">
+                <p class="brand-kicker">Find My Desk</p>
+                <strong>Workday Planner</strong>
+            </div>
+            <div class="nav-links" role="tablist" aria-label="Main views">
+                <button class="nav-tab {% if initial_view == 'bookings' %}active{% endif %}" data-view="bookings" role="tab" aria-selected="{% if initial_view == 'bookings' %}true{% else %}false{% endif %}">📋 Bookings</button>
+                <button class="nav-tab {% if initial_view == 'settings' %}active{% endif %}" data-view="settings" role="tab" aria-selected="{% if initial_view == 'settings' %}true{% else %}false{% endif %}">⚙️ User Settings</button>
+            </div>
+            <button id="releaseDeskButton" type="button" class="button release-desk" disabled>Release Desk</button>
+            <button id="extendStayButton" type="button" class="button extend-stay hidden">Extend Stay</button>
+        </nav>
+
+        <section id="weatherPanel" class="weather-strip card" aria-live="polite">
+            <div class="weather-copy">
+                <p class="weather-kicker">Office Weather</p>
+                <h2 id="weatherHeadline">Loading weather...</h2>
+                <p id="weatherSummary" class="weather-summary muted">Fetching the latest office conditions.</p>
+                <p id="weatherDetail" class="weather-detail muted">Please wait while we load the forecast.</p>
+            </div>
+            <div class="weather-badge">
+                <img id="weatherIcon" alt="" class="weather-icon hidden" />
+                <strong id="weatherTemperature">--</strong>
+                <span id="weatherSource">Loading</span>
+            </div>
+        </section>
+
+        <section class="layout" data-view-panel="bookings">
+            <header class="hero card">
+                <div>
+                    <p class="tag">Hybrid Work Hub</p>
+                    <h1>Book Your Desk Without The Guesswork</h1>
+                    <p class="subtitle">
+                        Pick a floor, scan availability in real time, and reserve your spot in under 10 seconds.
+                    </p>
+                </div>
+                <div class="hero-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Date</span>
+                        <input id="bookingDate" type="date" />
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Signed In As</span>
+                        <p id="userBadge">Loading...</p>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Switch User</span>
+                        <select id="userSwitchSelect" aria-label="Switch active user">
+                            <option value="">Loading users...</option>
+                        </select>
+                    </div>
+                    <div class="hero-actions">
+                        <a id="signInButton" class="button outline hidden" href="/auth/login">Sign in with Microsoft</a>
+                        <a id="signOutButton" class="button subtle hidden" href="/auth/logout">Sign out</a>
+                    </div>
+                </div>
+            </header>
+
+            <article class="card floor-panel">
+                <div class="floor-head">
+                    <h2>Floor Map</h2>
+                    <div class="tabs" role="tablist">
+                        <button class="tab active" data-floor="ground" role="tab">Ground</button>
+                        <button class="tab" data-floor="first" role="tab">First</button>
+                    </div>
+                </div>
+                <div class="canvas-wrap">
+                    <img id="floorImage" src="/floorplans/ground.png" alt="Office floor plan" />
+                    <div id="deskLayer"></div>
+                </div>
+                <p id="floorSummary" class="floor-summary">Loading availability...</p>
+            </article>
+
+            <aside class="card side-panel">
+                <h2>Reservation</h2>
+                <p class="hint">Select an available desk pin on the map.</p>
+                <div id="selectedDeskCard" class="selected-desk empty">
+                    <p>No desk selected</p>
+                </div>
+                <div id="slotToggle" class="slot-toggle" role="radiogroup" aria-label="Booking slot">
+                    <label><input type="radio" name="slot" value="full" checked /> Full day</label>
+                    <label><input type="radio" name="slot" value="am" /> AM</label>
+                    <label><input type="radio" name="slot" value="pm" /> PM</label>
+                </div>
+                <button id="bookButton" class="button primary" disabled>Book This Desk</button>
+                <button id="cancelButton" class="button ghost" disabled>Cancel Booking</button>
+                <div class="divider"></div>
+                <h3>Office Busyness</h3>
+                <p id="officeBusyMeta" class="hint compact-hint">Calculating office busyness...</p>
+                <div class="divider"></div>
+                <h3>Recommended Desks</h3>
+                <p id="recommendationMeta" class="hint compact-hint">Finding your best available desk matches...</p>
+                <ul id="recommendedDeskList" class="recommendation-list"></ul>
+                <div class="divider"></div>
+                <h3>Today's Bookings</h3>
+                <ul id="bookingList" class="booking-list"></ul>
+            </aside>
+        </section>
+
+        <section class="settings-layout hidden" data-view-panel="settings">
+            <article class="card settings-panel">
+                <div class="settings-head">
+                    <h2>User Settings</h2>
+                    <p>Save your desk preferences and choose teammates you would like to sit near.</p>
+                </div>
+
+                <form id="settingsForm" class="settings-form">
+                    <fieldset>
+                        <legend>Desk Preferences</legend>
+                        <div id="deskPreferencesGrid" class="prefs-grid"></div>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Anchor Days</legend>
+                        <div class="prefs-grid">
+                            <label><input type="checkbox" name="anchorDays" value="mon" /> Monday</label>
+                            <label><input type="checkbox" name="anchorDays" value="tue" /> Tuesday</label>
+                            <label><input type="checkbox" name="anchorDays" value="wed" /> Wednesday</label>
+                            <label><input type="checkbox" name="anchorDays" value="thu" /> Thursday</label>
+                            <label><input type="checkbox" name="anchorDays" value="fri" /> Friday</label>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>People You Prefer To Sit Near</legend>
+                        <label for="preferredUserSearch">Search colleagues by name or team</label>
+                        <div class="people-picker">
+                            <input id="preferredUserSearch" type="text" autocomplete="off" placeholder="Start typing a name..." />
+                            <div id="preferredUserResults" class="people-results hidden" role="listbox" aria-label="Search results"></div>
+                            <div id="selectedPreferredUsers" class="selected-people"></div>
+                        </div>
+                    </fieldset>
+
+                    <div class="settings-actions">
+                        <button type="submit" class="button primary">Save Settings</button>
+                        <button id="resetSettingsButton" type="button" class="button ghost">Reset</button>
+                    </div>
+                </form>
+            </article>
+        </section>
+    </main>
+
+    <template id="deskPinTemplate">
+        <button class="desk-pin" type="button"></button>
+    </template>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

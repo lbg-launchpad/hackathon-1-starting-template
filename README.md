@@ -41,4 +41,50 @@ Office layout images are in the `floorplans/` directory: `ground.png` and `first
 
 ### Employee Directory
 
-`data/users.json` contains 50 fictional bank employee records. Each record includes details such as name, job title, department, and contact information — enough to simulate a realistic internal directory. 
+The app stores employee directory records in `data/users.db` and desk records in `data/desks.db`.
+
+---
+
+## Azure OIDC SSO (Developer Setup)
+
+This template includes a runnable web auth flow with Azure OIDC.
+
+### 1. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Configure environment variables
+
+Copy `.env.example` values into your environment (or `.env` loader if you use one):
+
+- `AZURE_TENANT_ID`
+- `AZURE_CLIENT_ID`
+- `AZURE_CLIENT_SECRET`
+- `AZURE_REDIRECT_URI`
+- `FLASK_SECRET_KEY`
+- `POST_LOGOUT_REDIRECT_URI`
+
+### 3. Register redirect URI in Azure Entra
+
+In App Registration -> Authentication -> Web, add:
+
+- Local: `http://localhost:5000/auth/callback`
+- Public site: `https://<your-domain>/auth/callback`
+
+The value **must exactly match** `AZURE_REDIRECT_URI`.
+
+### 4. Run app
+
+```bash
+python -m App.app
+```
+
+### 5. Endpoints
+
+- `/` Home page with sign-in link
+- `/auth/login` Starts Azure login
+- `/auth/callback` OAuth callback endpoint
+- `/auth/logout` Signs out locally and redirects to Azure logout
+- `/api/me` Returns current user profile from session
