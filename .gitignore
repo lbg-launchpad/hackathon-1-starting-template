@@ -1,1 +1,8 @@
 *.DS_Store
+node_modules
+dist
+.env
+.env.local
+*.log
+src/routeTree.gen.ts
+.vite
